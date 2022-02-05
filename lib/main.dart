@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             onPressed: _veriGetir,
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_sharp),
           ),
         ],
       ),
@@ -134,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }
         },
         tooltip: 'Translate',
-        child: const Icon(Icons.translate),
+        child: const Icon(Icons.g_translate_sharp),
       ),
     );
   }
