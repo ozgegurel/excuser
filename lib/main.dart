@@ -90,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         SizedBox(height: 10),
                         ListTile(
                           //Text("Category: ${excuse['category']}"),
-                          leading: const Icon(Icons.list),
+                          //leading: const Icon(Icons.list),
                           title: Center(
                             child: Text(
                               "${excuse['excuse']}",
