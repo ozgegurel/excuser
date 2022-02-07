@@ -1,7 +1,5 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
-
 import 'package:http/http.dart';
 import 'package:translator/translator.dart';
 
@@ -14,13 +12,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Excuser',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Excuser Home'),
+      home: MyHomePage(title: 'Excuser Home'),
     );
   }
 }
@@ -37,32 +32,32 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final translator = GoogleTranslator();
 
-  List<Map> _mazeretler = [];
-  Map mazeret = {};
+  List<Map> _excuses = [];
+  Map excuse = {};
   Map _translatedTexts = {};
 
-  Future<void> _veriGetir() async {
-    // Daha detaylı kullanım için => https://excuser.herokuapp.com/
-    _mazeretler = [];
+  Future<void> _getExcuse({String n = "3"}) async {
+    // https://excuser.herokuapp.com/
+    _excuses = [];
     _translatedTexts = {};
 
-    final cevap = await get(
+    final response = await get(
       Uri(
         host: "excuser.herokuapp.com",
         scheme: "https",
-        pathSegments: ["v1", "excuse", "3"],
+        pathSegments: ["v1", "excuse", n],
       ),
     );
 
     // JSON =>
-    _mazeretler = (jsonDecode(cevap.body) as List).cast();
+    _excuses = (jsonDecode(response.body) as List).cast();
 
     setState(() {});
   }
 
   @override
   void initState() {
-    _veriGetir();
+    _getExcuse();
 
     super.initState();
   }
@@ -72,62 +67,62 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        backgroundColor: Colors.yellow[700],
         actions: [
           IconButton(
-            onPressed: _veriGetir,
+            onPressed: _getExcuse,
             icon: const Icon(Icons.refresh_sharp),
+            hoverColor: Colors.yellow[800],
           ),
         ],
       ),
-      body: _mazeretler.isEmpty
+      body: _excuses.isEmpty
           ? const Center(
               child: CircularProgressIndicator(),
             )
           : ListView(
               children: <Widget>[
-                for (final mazeret in _mazeretler)
-                  Column(
-                    children: [
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Center(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Category: ${mazeret['category']}"),
-                                Text(
-                                  "${mazeret['excuse']}",
-                                  style: Theme.of(context).textTheme.headline6,
-                                ),
-                              ],
+                for (final excuse in _excuses)
+                  SizedBox(
+                    height: 80,
+                    child: Card(
+                      child: ListView(children: [
+                        SizedBox(height: 10),
+                        ListTile(
+                          //Text("Category: ${excuse['category']}"),
+                          leading: const Icon(Icons.list),
+                          title: Center(
+                            child: Text(
+                              "${excuse['excuse']}",
+                              style: Theme.of(context).textTheme.headline6,
+                            ),
+                          ),
+                          subtitle: Center(
+                            child: Text(
+                              (_translatedTexts.isNotEmpty)
+                                  ? (_translatedTexts[excuse["id"]] ??
+                                      "Çeviri yapilamadi.")
+                                  : "",
+                              style: const TextStyle(
+                                  fontFamily: 'Raleway',
+                                  color: Colors
+                                      .blue //Theme.of(context).textTheme.bodyText1,
+                                  ),
                             ),
                           ),
                         ),
-                      ),
-                      if (_translatedTexts.isNotEmpty)
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Center(
-                              child: Text(
-                                _translatedTexts[mazeret["id"]] ??
-                                    "Çeviri yapilamadi.",
-                                style: Theme.of(context).textTheme.headline6,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
+                      ]),
+                    ),
                   ),
               ],
             ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.yellow[900],
         onPressed: () {
-          if (_mazeretler.isNotEmpty) {
-            for (final mazeret in _mazeretler) {
-              translator.translate(mazeret['excuse'], to: 'tr').then((ceviri) {
-                _translatedTexts[mazeret["id"]] = ceviri.text;
+          if (_excuses.isNotEmpty) {
+            for (final excuse in _excuses) {
+              translator.translate(excuse['excuse'], to: 'tr').then((ceviri) {
+                _translatedTexts[excuse["id"]] = ceviri.text;
                 setState(() {});
               });
             }
